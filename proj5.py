@@ -197,7 +197,7 @@ print("The average estimated water level at is %.2f meters" %avg_wl)
 
 ##---------------Plotting----------------------##
 fig = plt.figure()
-plt.title('Plot Average Waterline Height vs. Time')
+plt.title('Average Waterline Height vs. Time')
 plt.ylabel('Average Waterline (m)')
 plt.xlabel('Frame Number')
 plt.plot(frames, avg_wtl, 'b-', label = 'Extracted Y Points')
