@@ -16,7 +16,7 @@ def resize_image(img, scale):
 def levelEst(markings, lvl, pxl_avg):
     mark_dict = {}
     vals = []
-    height = 8.2
+    height = 7.5
 
     #creating marking dictionary for pixel to meter translation
     for i in range(0, len(markings)):
@@ -162,7 +162,7 @@ while ship_vid.isOpened():
 
         #display marking coordinates
         for pt in markings:
-            cv.circle(img_warp, pt, 1, (0,0,255), 1)
+            cv.circle(img_warp, pt, 1, (0,0,255), -1)
 
         #calculate the average number of pixels between markings
         tot_dif = 0
@@ -179,7 +179,8 @@ while ship_vid.isOpened():
         lvl = (1100, 450)
         cv.circle(img_warp, lvl, 1, (255,0,255), 5)
 
-        print("the estimated water level at pink point is %.2f meters" %levelEst(markings, lvl, p2cm))
+        print("The estimated water level at pink point is %.2f meters" %levelEst(markings, lvl, p2cm))
+
         avg_wtl.append(levelEst(markings, lvl, p2cm))
             
         img_resize = resize_image(img_warp, 0.5)
@@ -200,7 +201,7 @@ fig = plt.figure()
 plt.title('Average Waterline Height vs. Time')
 plt.ylabel('Average Waterline (m)')
 plt.xlabel('Frame Number')
-plt.plot(frames, avg_wtl, 'b-', label = 'Extracted Y Points')
+plt.plot(frames, avg_wtl, 'b-', label = 'Average Frame Waterline')
 plt.legend()
 plt.show()
 
