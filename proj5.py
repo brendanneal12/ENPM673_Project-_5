@@ -128,9 +128,13 @@ if ret == True:
 back_subtract = cv.createBackgroundSubtractorMOG2()
 
 avg_wtl = []
+count = 1
+frames = []
 while ship_vid.isOpened():
     ret, frame = ship_vid.read()
     if ret == True:
+        frames.append(count)
+        count += 1
         img_warp = cv.warpPerspective(frame, H, (row, col+200))
         height = water_level(img_warp)
         # if height != 0:
@@ -190,3 +194,13 @@ while ship_vid.isOpened():
 
 avg_wl = sum(avg_wtl)/len(avg_wtl)
 print("The average estimated water level at is %.2f meters" %avg_wl)
+
+##---------------Plotting----------------------##
+fig = plt.figure()
+plt.title('Plot Average Waterline Height vs. Time')
+plt.ylabel('Average Waterline (m)')
+plt.xlabel('Frame Number')
+plt.plot(frames, avg_wtl, 'b-', label = 'Extracted Y Points')
+plt.legend()
+plt.show()
+
