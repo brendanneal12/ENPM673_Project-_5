@@ -127,6 +127,7 @@ if ret == True:
 
 back_subtract = cv.createBackgroundSubtractorMOG2()
 
+avg_wtl = []
 while ship_vid.isOpened():
     ret, frame = ship_vid.read()
     if ret == True:
@@ -175,6 +176,7 @@ while ship_vid.isOpened():
         cv.circle(img_warp, lvl, 1, (255,0,255), 5)
 
         print("the estimated water level at pink point is %.2f meters" %levelEst(markings, lvl, p2cm))
+        avg_wtl.append(levelEst(markings, lvl, p2cm))
             
         img_resize = resize_image(img_warp, 0.5)
         cv.imshow('Water Level Detection', img_resize)
@@ -185,3 +187,6 @@ while ship_vid.isOpened():
             break
     else:
         break
+
+avg_wl = sum(avg_wtl)/len(avg_wtl)
+print("The average estimated water level at is %.2f meters" %avg_wl)
