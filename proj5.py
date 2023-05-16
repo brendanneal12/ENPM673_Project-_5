@@ -3,7 +3,7 @@ import cv2 as cv
 import matplotlib.pyplot as plt
 
 
-
+################## functions #########################
 
 def transformation(image):   
     lower_orange = np.array([0,80,150]) #bgr thresholds
@@ -19,7 +19,7 @@ def transformation(image):
     hull_filter = cv.bitwise_and(image_filt, image_filt, mask= hull_mask)
     hull_edges = cv.Canny(hull_filter,50,200)
     hull_lines = cv.HoughLinesP(hull_edges,rho=1,theta=np.pi/180,threshold=60,minLineLength=0,maxLineGap=50)
-    print(hull_lines)
+    # print(hull_lines)
     # cv.imshow('Original',frame)
     # cv.imshow('Gray', frame_gray)
     # cv.imshow('Rectangle ROI',image_rect)
@@ -33,37 +33,33 @@ def transformation(image):
     #     cv.line(lines_out, startPoint, endPoint, (255, 0, 0))
     # cv.imshow('Line Output', lines_out)
 
-
     p1 = [hull_lines[3][0][0], hull_lines[3][0][1]]
     p2 = [hull_lines[3][0][2], hull_lines[3][0][3]]
     p3 = [hull_lines[4][0][0], hull_lines[4][0][1]]
     p4 = [hull_lines[4][0][2], hull_lines[4][0][3]]
-
-    # y_av = int(np.round(np.average((p1[1], p2[1], p3[1], p4[1]))))
-    # # print(y_av)
 
     l1 = [p1[0], 190]
     l2 = [p2[0], 190]
     l3 = [p3[0]-3, 145+1]
     l4 = [p4[0], 145]
 
-    # src_pts = []
-    # dst_pts = []
-    # for i in range(len(hull_lines)):
-    #     src_pts.append([hull_lines[i][0][0], hull_lines[i][0][1]])
-    #     src_pts.append([hull_lines[i][0][2], hull_lines[i][0][3]])
-    #     dst_pts.append([hull_lines[i][0][0], 173])
-    #     dst_pts.append([hull_lines[i][0][2], 173])
-
     src_pts = np.array([p1,p2,p3,p4])
     dst_pts = np.array([l1,l2,l3,l4])
-    print(src_pts)
-    print(dst_pts)
+    # print(src_pts)
+    # print(dst_pts)
 
     H, _ = cv.findHomography(src_pts, dst_pts)
-    print("Homography Matrix:",H)
+    # print("Homography Matrix:",H)
     return H
 
+def resize_image(img, scale):
+    scale_width = int(img.shape[1] * scale)
+    scale_height = int(img.shape[0] * scale)
+    dim = (scale_width, scale_height)
+    resize_img = cv.resize(img, dim, interpolation = cv.INTER_AREA)
+    return resize_img
+
+################### main script ###########################
 
 ship_vid = cv.VideoCapture("hull.mp4")
 
@@ -73,8 +69,17 @@ if ret == True:
     col, row, _= np.shape(frame)
     H = transformation(frame)
 
-scale = 1
-img_out = cv.warpPerspective(frame, H, (scale*row, scale*col))
-
-cv.imshow('Transformed Image', img_out)
-cv.waitKey()
+while ship_vid.isOpened():
+    ret, frame = ship_vid.read()
+    if ret == True:
+        scale = 1
+        img_warp = cv.warpPerspective(frame, H, (scale*row, scale*col))
+        img_resize = resize_image(img_warp, 0.5)
+        cv.imshow('Transformed Image', img_resize)
+        
+        key = cv.waitKey(20)
+    
+        if key == ord('q'):
+            break
+    else:
+        break
