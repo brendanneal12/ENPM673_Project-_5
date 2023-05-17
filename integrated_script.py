@@ -292,9 +292,10 @@ while ship_vid.isOpened():
 for lvl in avg_wtl:
     level_list.append(lvl)
 
-for lvl in level_list:
+for i, lvl in zip(frames,level_list):
     if lvl < 7.8 or lvl > 10.5:
         level_list.remove(lvl)
+        frames.remove(i)
 
 
 avg_level = sum(level_list)/len(level_list)
@@ -316,6 +317,6 @@ fig = plt.figure()
 plt.title('Average Waterline Height vs. Time')
 plt.ylabel('Average Waterline (m)')
 plt.xlabel('Frame Number')
-plt.plot(frames, avg_wtl, 'b-', label = 'Average Frame Waterline')
+plt.plot(frames, level_list, 'b-', label = 'Average Frame Waterline')
 plt.legend()
 plt.show()
