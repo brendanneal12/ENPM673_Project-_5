@@ -176,22 +176,25 @@ while ship_vid.isOpened():
 
         M_vals = re.findall("\d+M", digits)         # one or more digits followed by a M
 
-        # find_y = []
-        # if not m_loc:
-        #     print("Nothing to index")
-        # else:
-        #     for j in range(len(digit_vals)):
-        #         if digit_vals[j] == '10M':
-        #             idx = m_loc[0]
-        #             find_y.append(10)
-        #             find_y.append(float(box[(idx+2):(idx+6)]))
-        #             find_y.append(float(box[(idx+7):(idx+11)]))
-        #             break
-        #         elif digit_vals[j] == '9M':
-        #             idx = m_loc[-1]
-        #             find_y.append(9)
-        #             find_y.append(float(box[(idx+2):(idx+6)]))   # x value of the bottom left corner
-        #             find_y.append(float(box[(idx+7):(idx+11)]))  # y value of the bottom left corner
+        find_y = []
+        if not m_loc:
+            print("Nothing to index")
+        else:
+            for j in range(len(digit_vals)):
+                if digit_vals[j] == '10M':
+                    idx = m_loc[0]
+                    find_y.append(10)
+                    find_y.append(float(box[(idx+2):(idx+6)]))
+                    find_y.append(float(box[(idx+7):(idx+11)]))
+                    break
+                elif digit_vals[j] == '9M':
+                    idx = m_loc[-1]
+                    find_y.append(9)
+                    if box[(idx+2)] != '0':
+                        find_y.append(float(box[(idx+2):(idx+6)]))   # x value of the bottom left corner
+                        find_y.append(float(box[(idx+7):(idx+11)]))  # y value of the bottom left corner
+                    else:
+                        m_loc = []
 
         hull_gray = cv.cvtColor(img_warp, cv.COLOR_BGR2GRAY)
         _,thresh = cv.threshold(hull_gray,200,255,cv.THRESH_BINARY)
