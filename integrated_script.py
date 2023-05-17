@@ -245,7 +245,7 @@ while ship_vid.isOpened():
                 print("The estimated water level is %.2f meters" %levelEst(markings, height, p2cm))
 
                 avg_wtl.append(levelEst(markings, height, p2cm))
-                cv.putText(img_warp, "Water level : "+levelEst(markings,height,p2cm), (30,30), cv.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 1, cv.LINE_AA)
+                cv.putText(img_warp, "Water level : %d"%levelEst(markings,height,p2cm), (30,30), cv.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 1, cv.LINE_AA)
                 
                 img_resize = resize_image(img_warp, 0.5)
                 #cv.imshow('Water Level Detection', img_resize)
@@ -297,7 +297,6 @@ for i, lvl in zip(frames,level_list):
         level_list.remove(lvl)
         frames.remove(i)
 
-
 avg_level = sum(level_list)/len(level_list)
 print("Average water level on hull: %.2f meters" %avg_level)
 print("Frame number: " + str(frame_count))
@@ -310,8 +309,14 @@ for i in range(200):
 video.release()
 ship_vid.release()
 cv.destroyAllWindows()
-
-
+c = 0
+for l in level_list:
+    if l < 5:
+        level_list.remove(l)
+    c += 1
+diff = len(frames) - len(level_list)
+for i in range(0, diff):
+    frames.pop()
 ##========Plotting========##
 fig = plt.figure()
 plt.title('Average Waterline Height vs. Time')
