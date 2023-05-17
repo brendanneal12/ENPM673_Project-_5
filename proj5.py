@@ -185,6 +185,7 @@ while ship_vid.isOpened():
             
         img_resize = resize_image(img_warp, 0.5)
         cv.imshow('Water Level Detection', img_resize)
+
         
         key = cv.waitKey(20)
     

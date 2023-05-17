@@ -2,6 +2,7 @@ import numpy as np
 import cv2 as cv
 import pytesseract
 import re
+from matplotlib import pyplot as plt
 
 # Downloaded pytesseract and put the location here
 #pytesseract.pytesseract.tesseract_cmd = "C:/Users/18049/AppData/Local/Programs/Tesseract-OCR/tesseract.exe"
@@ -144,6 +145,10 @@ avg_wtl = []
 count = 1
 frames = []
 
+video_name = ('group9_final') #Initialize Video Object
+fourcc = cv.VideoWriter_fourcc(*"mp4v") #Initialize Video Writer using fourcc
+video = cv.VideoWriter(str(video_name)+".mp4", fourcc, 300,(960,640)) #Initialize the Name, method, frame rate, and size of Video.
+
 while ship_vid.isOpened():
     ret, frame = ship_vid.read()
 
@@ -243,6 +248,7 @@ while ship_vid.isOpened():
                 
                 img_resize = resize_image(img_warp, 0.5)
                 #cv.imshow('Water Level Detection', img_resize)
+                video.write(cv.cvtColor(img_warp, cv.COLOR_RGB2BGR)) #Write to Video
             
                 key = cv.waitKey(10)
 
@@ -294,5 +300,21 @@ avg_level = sum(level_list)/len(level_list)
 print("Average water level on hull: %.2f meters" %avg_level)
 print("Frame number: " + str(frame_count))
 print("Total Frame number: " + str(total_frame))
+
+##----------Extend Video a Little Longer to see Everything--------##
+for i in range(200):
+    video.write(cv.cvtColor(img_warp, cv.COLOR_RGB2BGR))
+
+video.release()
 ship_vid.release()
 cv.destroyAllWindows()
+
+
+##========Plotting========##
+fig = plt.figure()
+plt.title('Average Waterline Height vs. Time')
+plt.ylabel('Average Waterline (m)')
+plt.xlabel('Frame Number')
+plt.plot(frames, avg_wtl, 'b-', label = 'Average Frame Waterline')
+plt.legend()
+plt.show()
