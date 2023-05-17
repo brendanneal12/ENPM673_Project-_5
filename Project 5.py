@@ -4,8 +4,8 @@ import pytesseract
 import re
 
 # Downloaded pytesseract and put the location here
-#pytesseract.pytesseract.tesseract_cmd = "C:/Users/18049/AppData/Local/Programs/Tesseract-OCR/tesseract.exe"
-pytesseract.pytesseract.tesseract_cmd = "C:/Program Files/Tesseract-OCR/tesseract.exe"
+pytesseract.pytesseract.tesseract_cmd = "C:/Users/18049/AppData/Local/Programs/Tesseract-OCR/tesseract.exe"
+#pytesseract.pytesseract.tesseract_cmd = "C:/Program Files/Tesseract-OCR/tesseract.exe"
 
 ################## functions #########################
 
@@ -122,21 +122,13 @@ while ship_vid.isOpened():
 
         # for x, y coordinates of bounding rectangles on characters found
         box = pytesseract.image_to_boxes(warp_inverted, lang='eng', config='--psm 11 --oem 3 -c tessedit_char_whitelist=0124689M')
-        print("The box:")
-        print(box)
-        print(box[-15:-11])  # compare lowest character y value with waterline estimate
-        print("Not box")
-
-        #for i in range(len(box)):
-        #    if box
 
         M_vals = re.findall("\d+M", digits)         # one or more digits followed by a M
 
         digit_vals = re.findall("\w+", digits)  # convert the strings found into a list
 
         print(digit_vals)
-        print("Look up")
-
+        
         if len(M_vals) >= 1:
             M_digit = M_vals[-1]                        # get the lower M value detected
             first_digit = int(M_digit.replace('M',''))  # replace M with empty space and convert to int

@@ -90,6 +90,42 @@ def transformation(image):
     return H
 
 
+def levelEst(markings, lvl, pxl_avg, height):
+    mark_dict = {}
+    vals = []
+    #height = 7.5
+
+    #get only y pixel values for markings
+    y_vals = []
+    diff = []
+    for pt in markings:
+        y_vals.append(pt[1])
+        diff_y = abs(pt[1] - lvl[1])
+        diff.append(diff_y)
+
+    notc = diff.index(min(diff))
+
+    #creating marking dictionary for pixel to meter translation
+    for i in range(0, len(markings)):
+        vals.append(height)
+        height = round((height + 0.1 * (notc - i)), 2)
+    for i in range(0, len(markings)):
+        mark_dict[markings[i][1]] = vals[i]
+
+    print("y_vals:")
+    print(y_vals)
+    #find nearest marker below point
+    near = -1
+    while near < lvl[1]:
+        near = min(y_vals, key=lambda x:abs(x-lvl[1]))
+        y_vals.remove(near)
+
+    #estimate remainder
+    rem = np.abs(lvl[1] - near)
+    cm = (rem/pxl_avg)/100
+    est_height = round((mark_dict[near] + cm), 2)
+    return est_height
+
 
 ################### main script ###########################
 
@@ -103,14 +139,19 @@ if ret == True:
 
 back_subtract = cv.createBackgroundSubtractorMOG2()
 
-frame_count = 0
-total_frame = 0
-level_list = []
+#frame_count = 0
+#total_frame = 0
+#level_list = []
+avg_wtl = []
+count = 1
+frames = []
 
 while ship_vid.isOpened():
     ret, frame = ship_vid.read()
 
     if ret == True:
+        frames.append(count)
+        count += 1
         img_warp = cv.warpPerspective(frame, H, (row, col+200))
         height, thresh_frame = water_level(img_warp)
 
@@ -122,10 +163,7 @@ while ship_vid.isOpened():
 
         # for x, y coordinates of bounding rectangles on characters found
         box = pytesseract.image_to_boxes(warp_inverted, lang='eng', config='--psm 11 --oem 3 -c tessedit_char_whitelist=0124689M')
-        print("The box:")
-        print(box)
-        print("Not box")
-
+        
         digit_vals = re.findall("\w+", digits)  # convert the strings found into a list
 
         m_loc = []
@@ -143,55 +181,112 @@ while ship_vid.isOpened():
                 if digit_vals[j] == '10M':
                     idx = m_loc[0]
                     find_y.append(10)
+                    find_y.append(float(box[(idx+2):(idx+6)]))
                     find_y.append(float(box[(idx+7):(idx+11)]))
                     break
                 elif digit_vals[j] == '9M':
                     idx = m_loc[-1]
                     find_y.append(9)
-                    find_y.append(float(box[(idx+7):(idx+11)]))
+                    find_y.append(float(box[(idx+2):(idx+6)]))   # x value of the bottom left corner
+                    find_y.append(float(box[(idx+7):(idx+11)]))  # y value of the bottom left corner
 
-        print("Testing")
-        print(find_y)
-        print("welp")
+        hull_gray = cv.cvtColor(img_warp, cv.COLOR_BGR2GRAY)
+        _,thresh = cv.threshold(hull_gray,200,255,cv.THRESH_BINARY)
 
-        print(digit_vals)
+        #identify hull markings
+        contours, hier = cv.findContours(thresh, cv.RETR_LIST, cv.CHAIN_APPROX_NONE)
+
+        #filter out anything not a marking
+        good_cnt = []
+        markings = []
+        for cnt in contours:
+            rect = cv.boundingRect(cnt)
+            x,y,w,h = rect
+            size = cv.contourArea(cnt)
+            if 50 < size < 1500 and 1.2*w > h:
+                good_cnt.append(cnt)
+                pt = (x,y)
+                markings.append(pt)
+
+        #display marking coordinates
+        for pt in markings:
+            cv.circle(img_warp, pt, 1, (0,0,255), -1)
+
+        #calculate the average number of pixels between markings
+        tot_dif = 0
+        for i in range(0, len(markings)-1):
+            dif = markings[i][1] - markings[i+1][1]
+            tot_dif = dif + tot_dif
+
+        avg_dif = tot_dif/len(markings)
+
+        #convert pixels to centimeters (markings on ship are in increments of 10 cm)
+        p2cm = avg_dif/10
+
+        if not m_loc:
+            print("The water level is unknown")
+        else:
+            #create and plot imaginary waterline
+            x1 = find_y[1]
+            y1 = find_y[2]
+            unw = np.array([[x1], [y1], [1]])
+            war = np.dot(H, unw)
+            x = war[0]
+            y = war[1]
+
+            indc = find_y[0]
+            lvl = (int(x), int(y))
+            cv.circle(img_warp, lvl, 1, (255,0,255), 5)
+
+            print("The estimated water level at pink point is %.2f meters" %levelEst(markings, lvl, p2cm, indc))
+
+            avg_wtl.append(levelEst(markings, lvl, p2cm, indc))
+            
+            img_resize = resize_image(img_warp, 0.5)
+            cv.imshow('Water Level Detection', img_resize)
         
+            key = cv.waitKey(20)
 
-        if len(M_vals) >= 1:
-            M_digit = M_vals[-1]                        # get the lower M value detected
-            first_digit = int(M_digit.replace('M',''))  # replace M with empty space and convert to int
-            first_digit = first_digit-1
+        if key == ord('q'):
+            break
+
+        #print(digit_vals)
+        
+        #if len(M_vals) >= 1:
+         #   M_digit = M_vals[-1]                        # get the lower M value detected
+         #   first_digit = int(M_digit.replace('M',''))  # replace M with empty space and convert to int
+         #   first_digit = first_digit-1
             
-            last_digit = digit_vals[-1]
-            if 'M' in last_digit:   # if the lowest digit has M in it, the tenths place is zero
-                last_digit = 0
-                first_digit = first_digit+1
-            
-            digit_combined = str(first_digit) + "." + str(last_digit)
-            level = float(digit_combined)
-            print(level)
-            frame_count += 1
-            level_list.append(level)
+         #   last_digit = digit_vals[-1]
+         #   if 'M' in last_digit:   # if the lowest digit has M in it, the tenths place is zero
+         #       last_digit = 0
+         #       first_digit = first_digit+1
+         #   
+         #   digit_combined = str(first_digit) + "." + str(last_digit)
+         #   level = float(digit_combined)
+         #   print(level)
+          #  frame_count += 1
+         #   level_list.append(level)
 
             # store previous value, if change is more than 3 between values, dont use the value (outlier)
             
-        else:
-            print("Height not found")
+        #else:
+        #    print("Height not found")
 
-        total_frame += 1
+        #total_frame += 1
 
-        cv.imshow('Frame', resize_image(frame, 0.5))
+        #cv.imshow('Frame', resize_image(frame, 0.5))
         #cv.waitKey(1000)
         #print("end")
 
-        if cv.waitKey(25) & 0xFF == ord('e'):
-            break
+        #if cv.waitKey(25) & 0xFF == ord('e'):
+        #    break
     else:
         break
 
-avg_level = sum(level_list)/len(level_list)
-print(avg_level)
-print("Frame number: " + str(frame_count))
-print("Total Frame number: " + str(total_frame))
-ship_vid.release()
-cv.destroyAllWindows()
+#avg_level = sum(level_list)/len(level_list)
+#print(avg_level)
+#print("Frame number: " + str(frame_count))
+#print("Total Frame number: " + str(total_frame))
+#ship_vid.release()
+#cv.destroyAllWindows()
