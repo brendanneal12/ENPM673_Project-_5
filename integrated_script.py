@@ -245,6 +245,7 @@ while ship_vid.isOpened():
                 print("The estimated water level is %.2f meters" %levelEst(markings, height, p2cm))
 
                 avg_wtl.append(levelEst(markings, height, p2cm))
+                cv.putText(img_warp, "Water level : "+levelEst(markings,height,p2cm), (30,30), cv.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 1, cv.LINE_AA)
                 
                 img_resize = resize_image(img_warp, 0.5)
                 #cv.imshow('Water Level Detection', img_resize)
