@@ -248,7 +248,7 @@ while ship_vid.isOpened():
                 
                 img_resize = resize_image(img_warp, 0.5)
                 #cv.imshow('Water Level Detection', img_resize)
-                video.write(cv.cvtColor(img_warp, cv.COLOR_RGB2BGR)) #Write to Video
+                video.write(cv.cvtColor(img_resize, cv.COLOR_RGB2BGR)) #Write to Video
             
                 key = cv.waitKey(10)
 
@@ -303,7 +303,7 @@ print("Total Frame number: " + str(total_frame))
 
 ##----------Extend Video a Little Longer to see Everything--------##
 for i in range(200):
-    video.write(cv.cvtColor(img_warp, cv.COLOR_RGB2BGR))
+    video.write(cv.cvtColor(img_resize, cv.COLOR_RGB2BGR))
 
 video.release()
 ship_vid.release()
