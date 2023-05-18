@@ -11,7 +11,7 @@ Brendan Neal (119471128)
 
 Adam Nygaard (119457894)
 
-Harjot Singh
+Harjot Singh (119450697)
 
 # Project Information
 
@@ -32,6 +32,11 @@ numpy, opencv, pytesseract, re, from matplotlib: pyplot
 https://github.com/brendanneal12/ENPM673_Project-_5
 
 # Before Running Code:
+
+Download Pytesseract (Optical Character Recognition Tool) by following the instructions for Windows install in the link below.
+https://medium.com/@marioruizgonzalez.mx/how-install-tesseract-orc-and-pytesseract-on-windows-68f011ad8b9b
+
+Make sure to change the location of pytesseract download in line 8 of integrated_final.py.
 
 # How to Run Code:
 1. Download integrated_final.py and hull.mp4 to workspace.
