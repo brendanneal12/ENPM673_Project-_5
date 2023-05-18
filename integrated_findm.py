@@ -133,6 +133,7 @@ back_subtract = cv.createBackgroundSubtractorMOG2()
 frame_count = 0
 total_frame = 0
 level_list = []
+level_list_m = []
 count = 1
 frames = []
 maximum_height = 0
@@ -221,6 +222,7 @@ while ship_vid.isOpened():
             if find_y:
                 level = levelEst(markings, height, p2cm, find_y)
                 print("The estimated water level is %.2f meters" %level)
+                level_list_m.append(level)
 
                 level_list.append(level)
                 frames.append(count)
@@ -274,10 +276,28 @@ for lvl in level_list:
     else:
         final_list.append(lvl)
 
+# Post-processing to remove outliers in the M list
+levels = np.array(level_list_m)
+mean = np.mean(levels)
+std_dev = np.std(levels)
+lower = mean-2*std_dev
+upper = mean+2*std_dev
+
+final_list_m = []
+for lvlm in level_list_m:
+    if lvlm < lower or lvlm > upper:
+        #frames.pop()
+        a=0
+    else:
+        final_list_m.append(lvlm)
+
+
 
 #print(final_list)
 avg_level = sum(final_list)/len(final_list)
+avg_level_m = sum(final_list_m)/len(final_list_m)
 print("Average water level on hull: %.2f meters" %avg_level)
+print("Average water M level on hull: %.2f meters" %avg_level_m)
 
 ##----------Extend Video a Little Longer to see Everything--------##
 #for i in range(200):
