@@ -5,7 +5,8 @@ import re
 from matplotlib import pyplot as plt
 
 # Downloaded pytesseract and put the location here
-pytesseract.pytesseract.tesseract_cmd = "C:/Users/harjo/AppData/Local/Programs/Tesseract-OCR/tesseract.exe"
+#pytesseract.pytesseract.tesseract_cmd = "C:/Users/harjo/AppData/Local/Programs/Tesseract-OCR/tesseract.exe"
+pytesseract.pytesseract.tesseract_cmd = "C:/Program Files/Tesseract-OCR/tesseract.exe"
 
 ################## functions #########################
 
