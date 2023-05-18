@@ -25,6 +25,8 @@ Python Version: 3
 
 # Libraries Used:
 
+numpy, opencv, pytesseract, re, from matplotlib: pyplot
+
 # GitHub Repository Link:
 
 https://github.com/brendanneal12/ENPM673_Project-_5
