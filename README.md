@@ -47,5 +47,8 @@ Make sure to change the location of pytesseract download in line 8 of integrated
 6. The average draft height for the entire video is printed to the terminal.
 7. Close the plot to end the program.
 
+# Important Notes:
+1. Since large videos cannot be uploaded directly to GitHub, please follow the following link to view the outputted video: https://drive.google.com/drive/folders/11qIydcLes_15Ba3fLCreDEAaEvQHbtQR?usp=sharing
+
 
 
